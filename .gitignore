@@ -1,0 +1,11 @@
+target/
+.idea/
+*.iml
+.vscode/
+.classpath
+.project
+.settings/
+.DS_Store
+Thumbs.db
+*.log
+# No subir credenciales reales (clave JWT, contrasena de BD).
