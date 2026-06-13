@@ -10,4 +10,6 @@ import java.util.List;
 public interface PartidoRepository extends JpaRepository<Partido, Long> {
 
     List<Partido> findByFechaId(Long fechaId);
+
+    List<Partido> findAllByOrderByHoraInicioAsc();
 }
