@@ -1,7 +1,5 @@
 -- TPI Prode - Script DDL (identificadores en espanol). Ejecutar en PostgreSQL.
 
-CREATE DATABASE prode_db;
-\c prode_db
 
 CREATE TABLE usuarios (
   id BIGSERIAL PRIMARY KEY,
