@@ -46,6 +46,13 @@ public class GlobalExceptionHandler {
         return construir(HttpStatus.BAD_REQUEST, msg);
     }
 
+    // Credenciales incorrectas (email o contrasena mal) -> 401
+    @ExceptionHandler(org.springframework.security.core.AuthenticationException.class)
+    public ResponseEntity<Map<String, String>> credencialesInvalidas(
+            org.springframework.security.core.AuthenticationException ex) {
+        return construir(HttpStatus.UNAUTHORIZED, "Credenciales invalidas");
+    }
+
     // Red de seguridad: cualquier excepcion no contemplada -> 500
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, String>> generica(Exception ex) {
