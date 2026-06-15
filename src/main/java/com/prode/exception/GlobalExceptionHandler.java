@@ -53,6 +53,13 @@ public class GlobalExceptionHandler {
         return construir(HttpStatus.UNAUTHORIZED, "Credenciales invalidas");
     }
 
+    // Acceso denegado por falta de permisos (@PreAuthorize) -> 403
+    @ExceptionHandler(org.springframework.security.access.AccessDeniedException.class)
+    public ResponseEntity<Map<String, String>> accesoProhibido(
+            org.springframework.security.access.AccessDeniedException ex) {
+        return construir(HttpStatus.FORBIDDEN, "Acceso denegado: no tenés permisos para esta operación");
+    }
+
     // Red de seguridad: cualquier excepcion no contemplada -> 500
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, String>> generica(Exception ex) {
