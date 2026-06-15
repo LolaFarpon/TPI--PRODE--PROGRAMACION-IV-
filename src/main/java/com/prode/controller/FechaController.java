@@ -7,6 +7,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -29,17 +30,20 @@ public class FechaController {
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<FechaResponse> crear(@Valid @RequestBody FechaRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(fechaService.crear(request));
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<FechaResponse> modificar(@PathVariable Long id,
                                                     @Valid @RequestBody FechaRequest request) {
         return ResponseEntity.ok(fechaService.modificar(id, request));
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> eliminar(@PathVariable Long id) {
         fechaService.eliminar(id);
         return ResponseEntity.noContent().build();
