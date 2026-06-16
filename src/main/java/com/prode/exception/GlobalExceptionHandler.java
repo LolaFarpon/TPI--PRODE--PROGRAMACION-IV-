@@ -46,6 +46,20 @@ public class GlobalExceptionHandler {
         return construir(HttpStatus.BAD_REQUEST, msg);
     }
 
+    // Credenciales incorrectas (email o contrasena mal) -> 401
+    @ExceptionHandler(org.springframework.security.core.AuthenticationException.class)
+    public ResponseEntity<Map<String, String>> credencialesInvalidas(
+            org.springframework.security.core.AuthenticationException ex) {
+        return construir(HttpStatus.UNAUTHORIZED, "Credenciales invalidas");
+    }
+
+    // Acceso denegado por falta de permisos (@PreAuthorize) -> 403
+    @ExceptionHandler(org.springframework.security.access.AccessDeniedException.class)
+    public ResponseEntity<Map<String, String>> accesoProhibido(
+            org.springframework.security.access.AccessDeniedException ex) {
+        return construir(HttpStatus.FORBIDDEN, "Acceso denegado: no tenés permisos para esta operación");
+    }
+
     // Red de seguridad: cualquier excepcion no contemplada -> 500
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, String>> generica(Exception ex) {
