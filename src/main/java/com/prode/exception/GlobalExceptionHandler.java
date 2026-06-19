@@ -63,6 +63,7 @@ public class GlobalExceptionHandler {
     // Red de seguridad: cualquier excepcion no contemplada -> 500
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, String>> generica(Exception ex) {
+        ex.printStackTrace();
         return construir(HttpStatus.INTERNAL_SERVER_ERROR, "Error interno del servidor");
     }
 }
