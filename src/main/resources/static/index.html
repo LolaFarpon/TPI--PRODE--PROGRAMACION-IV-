@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PRODE · Pronósticos deportivos</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+
+  <!-- Tipografías:
+       Anton  -> titulares y marcadores (estética de cartelería de estadio / número de camiseta)
+       Inter  -> texto, formularios, lo legible del día a día
+       JetBrains Mono -> números de los marcadores (se ven como un tablero LED) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="css/estilos.css" />
+</head>
+<body>
+
+  <!-- ════════════ BARRA SUPERIOR ════════════ -->
+  <header class="barra">
+    <a class="marca" href="#/" aria-label="Inicio">
+      <!-- Pelota dibujada en SVG (no es una imagen externa, así no depende de internet) -->
+      <svg class="pelota" viewBox="0 0 32 32" aria-hidden="true">
+        <circle cx="16" cy="16" r="15" fill="#F2F5F0" stroke="#0A1F1C" stroke-width="1.5"/>
+        <path d="M16 8 l4.7 3.4 -1.8 5.5 -5.8 0 -1.8 -5.5 Z" fill="#0A1F1C"/>
+        <path d="M16 8 V3 M20.7 11.4 l4.5 -1.6 M18.9 16.9 l2.9 4 M13.1 16.9 l-2.9 4 M11.3 11.4 l-4.5 -1.6"
+              stroke="#0A1F1C" stroke-width="1.3" fill="none"/>
+      </svg>
+      <span class="marca-texto">PRODE</span>
+    </a>
+
+    <!-- Pestañas de navegación: las dibuja app.js según si hay sesión y el rol -->
+    <nav class="nav" id="nav"></nav>
+
+    <!-- Chip de sesión (usuario logueado) o botón de ingreso: lo dibuja app.js -->
+    <div class="sesion" id="sesion"></div>
+  </header>
+
+  <!-- ════════════ CONTENIDO (acá se renderiza cada vista) ════════════ -->
+  <main class="contenedor" id="vista"></main>
+
+  <!-- ════════════ PIE ════════════ -->
+  <footer class="pie">
+    <div class="linea-cancha" aria-hidden="true"></div>
+    <p>PRODE · TPI Programación IV · UTN FRVM</p>
+  </footer>
+
+  <!-- Contenedor de avisos flotantes (toasts) -->
+  <div class="avisos" id="avisos" aria-live="polite"></div>
+
+  <!-- ORDEN IMPORTANTE:
+       1) api.js   -> capa que habla con el backend (define el objeto global API)
+       2) router.js-> el router de la SPA (define el objeto global Router)
+       3) app.js   -> arranca todo: navegación, sesión, vistas -->
+  <script src="js/api.js"></script>
+  <script src="js/router.js"></script>
+  <script src="js/app.js"></script>
+  <!-- Vistas por etapa (se cargan después de app.js y reemplazan los placeholders) -->
+  <script src="js/vista-auth.js"></script>
+  <script src="js/vista-partidos.js"></script>
+  <script src="js/vista-admin.js"></script>
+  <script src="js/vista-leaderboard.js"></script>
+  <script src="js/vista-grupos.js"></script>
+</body>
+</html>
