@@ -40,10 +40,10 @@ public class SecurityConfig {
                .authorizeHttpRequests(auth -> auth
                 
                 // Archivos del frontend (SPA): públicos, si no, no se puede ni ver el login.
-        .requestMatchers("/", "/index.html", "/*.html", "/favicon.svg", "/css/**", "/js/**", "/images/**").permitAll()
-        .requestMatchers("/api/auth/**").permitAll()   // registro y login: públicos
-        .anyRequest().authenticated()                  // todo lo demás: requiere token
-        )
+                .requestMatchers("/", "/index.html", "/*.html", "/favicon.svg", "/css/**", "/js/**", "/images/**").permitAll()
+                .requestMatchers("/api/auth/**").permitAll()   // registro y login: públicos
+                .anyRequest().authenticated()                  // todo lo demás: requiere token
+                )
                 // Sin sesión en el servidor: cada request se autentica con su token.
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 // Sin token en endpoint protegido -> 401 (en vez del 403 por defecto).
