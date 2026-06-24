@@ -53,10 +53,12 @@ body {
   font-family: var(--texto);
   color: var(--tiza);
   background-color: var(--cancha-1);
-  /* Sutil textura de "líneas de cancha" en el fondo, muy tenue */
   background-image:
-    radial-gradient(1200px 600px at 50% -10%, rgba(255, 122, 26, 0.06), transparent 60%),
-    repeating-linear-gradient(0deg, transparent 0 78px, rgba(255,255,255,0.012) 78px 79px);
+    linear-gradient(to bottom, rgba(8, 26, 23, 0.82) 0%, rgba(8, 26, 23, 0.95) 40%, var(--cancha-1) 100%),
+    url('../images/messi.jpeg');
+  background-size: cover;
+  background-position: center top;
+  background-attachment: fixed;
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
 }
