@@ -38,6 +38,8 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 // Reglas de acceso por endpoint.
                 .authorizeHttpRequests(auth -> auth
+                        // Archivos del frontend (SPA): públicos, si no, no se puede ni ver el login.
+                        .requestMatchers("/", "/index.html", "/favicon.svg", "/css/**", "/js/**").permitAll()
                         .requestMatchers("/api/auth/**").permitAll()   // registro y login: públicos
                         .anyRequest().authenticated()                  // todo lo demás: requiere token
                 )

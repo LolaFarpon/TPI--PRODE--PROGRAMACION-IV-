@@ -28,6 +28,7 @@ public interface PronosticoRepository extends JpaRepository<Pronostico, Long> {
         )
         FROM Usuario u
         LEFT JOIN Pronostico p ON p.usuario = u
+        WHERE u.rol = com.prode.entity.Rol.USER
         GROUP BY u.id, u.nombreUsuario, u.creadoEn
         ORDER BY
             COALESCE(SUM(p.puntosObtenidos), 0L)         DESC,
