@@ -37,11 +37,12 @@ public class SecurityConfig {
                 // API stateless con JWT: no usamos CSRF (pensado para sesiones con formularios).
                 .csrf(AbstractHttpConfigurer::disable)
                 // Reglas de acceso por endpoint.
-                .authorizeHttpRequests(auth -> auth
-                        // Archivos del frontend (SPA): públicos, si no, no se puede ni ver el login.
-                        .requestMatchers("/", "/index.html", "/favicon.svg", "/css/**", "/js/**").permitAll()
-                        .requestMatchers("/api/auth/**").permitAll()   // registro y login: públicos
-                        .anyRequest().authenticated()                  // todo lo demás: requiere token
+               .authorizeHttpRequests(auth -> auth
+                
+                // Archivos del frontend (SPA): públicos, si no, no se puede ni ver el login.
+                .requestMatchers("/", "/index.html", "/*.html", "/favicon.svg", "/css/**", "/js/**", "/images/**").permitAll()
+                .requestMatchers("/api/auth/**").permitAll()   // registro y login: públicos
+                .anyRequest().authenticated()                  // todo lo demás: requiere token
                 )
                 // Sin sesión en el servidor: cada request se autentica con su token.
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
