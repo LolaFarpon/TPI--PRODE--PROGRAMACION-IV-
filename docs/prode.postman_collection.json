@@ -1,56 +1,19 @@
 {
   "info": {
-    "_postman_id": "9f948d75-6477-47d2-9937-663defa7d15d",
     "name": "PRODE API - TPI Programación IV (UTN FRVM)",
-    "description": "Colección de la API de PRODE.\n\nCómo usarla:\n1. Verificá la variable {{baseUrl}} (por defecto http://localhost:8080).\n2. Ejecutá Auth > Login (admin o USER): guarda el token solo en {{token}}.\n3. El resto de las requests usan ese token automáticamente (Bearer).\n4. Para ver todo el flujo de una, usá la carpeta '8. Flujo de demo' en orden.\n\nDatos sembrados por test_data.sql: admin@prode.com/admin123 y lu@prode.com/lu12345.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
-  "auth": {
-    "type": "bearer",
-    "bearer": [
-      {
-        "key": "token",
-        "value": "{{token}}",
-        "type": "string"
-      }
-    ]
-  },
-  "event": [],
   "variable": [
     {
       "key": "baseUrl",
       "value": "http://localhost:8080"
     },
     {
-      "key": "token",
+      "key": "tokenAdmin",
       "value": ""
     },
     {
-      "key": "rol",
-      "value": ""
-    },
-    {
-      "key": "rnd",
-      "value": ""
-    },
-    {
-      "key": "horaInicio",
-      "value": ""
-    },
-    {
-      "key": "equipoLocalId",
-      "value": ""
-    },
-    {
-      "key": "equipoVisitanteId",
-      "value": ""
-    },
-    {
-      "key": "fechaId",
-      "value": ""
-    },
-    {
-      "key": "partidoId",
+      "key": "tokenUser",
       "value": ""
     }
   ],
@@ -59,7 +22,7 @@
       "name": "1. Auth",
       "item": [
         {
-          "name": "Registrar usuario",
+          "name": "Registrar usuario (USER)",
           "request": {
             "method": "POST",
             "header": [
@@ -79,24 +42,54 @@
                 "registro"
               ]
             },
-            "description": "Público. Crea un usuario con rol USER. Email/usuario repetido -> 409.",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"nombreUsuario\": \"nuevo_user\",\n  \"email\": \"nuevo@prode.com\",\n  \"password\": \"clave123\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            },
-            "auth": {
-              "type": "noauth"
+              "raw": "{\n  \"nombreUsuario\": \"tester\",\n  \"email\": \"tester@test.com\",\n  \"password\": \"123456\"\n}"
             }
-          },
-          "response": []
+          }
         },
         {
-          "name": "Login (admin)",
+          "name": "Registrar usuario ADMIN",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/registro",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "registro"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombreUsuario\": \"adminprode\",\n  \"email\": \"admin@prode.com\",\n  \"password\": \"admin123\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Despues de registrar este usuario, cambiar su rol a ADMIN.",
+                  "// En pgAdmin (o psql) correr:",
+                  "// UPDATE usuarios SET rol = 'ADMIN' WHERE email = 'admin@prode.com';",
+                  "// Despues hacer el Login ADMIN de nuevo para que el token lleve el rol ADMIN."
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Login ADMIN - guarda token",
           "request": {
             "method": "POST",
             "header": [
@@ -116,33 +109,20 @@
                 "login"
               ]
             },
-            "description": "Público. Devuelve el token y lo guarda en {{token}}.",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"admin@prode.com\",\n  \"password\": \"admin123\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            },
-            "auth": {
-              "type": "noauth"
+              "raw": "{\n  \"email\": \"admin@prode.com\",\n  \"password\": \"admin123\"\n}"
             }
           },
-          "response": [],
           "event": [
             {
               "listen": "test",
               "script": {
-                "type": "text/javascript",
                 "exec": [
-                  "// Guarda el token del login en la variable {{token}} para usarlo solo",
-                  "const res = pm.response.json();",
-                  "if (res && res.datos && res.datos.token) {",
-                  "  pm.collectionVariables.set('token', res.datos.token);",
-                  "  pm.collectionVariables.set('rol', res.datos.rol);",
-                  "  console.log('Token guardado. Rol:', res.datos.rol);",
+                  "var json = pm.response.json();",
+                  "if (json.datos && json.datos.token) {",
+                  "    pm.collectionVariables.set('tokenAdmin', json.datos.token);",
+                  "    console.log('Token admin guardado');",
                   "}"
                 ]
               }
@@ -150,7 +130,7 @@
           ]
         },
         {
-          "name": "Login (USER - lu)",
+          "name": "Login USER - guarda token",
           "request": {
             "method": "POST",
             "header": [
@@ -170,84 +150,31 @@
                 "login"
               ]
             },
-            "description": "Público. Inicia sesión como jugadora. Guarda el token en {{token}}.",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"lu@prode.com\",\n  \"password\": \"lu12345\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            },
-            "auth": {
-              "type": "noauth"
+              "raw": "{\n  \"email\": \"tester@test.com\",\n  \"password\": \"123456\"\n}"
             }
           },
-          "response": [],
           "event": [
             {
               "listen": "test",
               "script": {
-                "type": "text/javascript",
                 "exec": [
-                  "// Guarda el token del login en la variable {{token}} para usarlo solo",
-                  "const res = pm.response.json();",
-                  "if (res && res.datos && res.datos.token) {",
-                  "  pm.collectionVariables.set('token', res.datos.token);",
-                  "  pm.collectionVariables.set('rol', res.datos.rol);",
-                  "  console.log('Token guardado. Rol:', res.datos.rol);",
+                  "var json = pm.response.json();",
+                  "if (json.datos && json.datos.token) {",
+                  "    pm.collectionVariables.set('tokenUser', json.datos.token);",
+                  "    console.log('Token user guardado');",
                   "}"
                 ]
               }
             }
           ]
         }
-      ],
-      "description": "Registro y login. El login guarda el token automáticamente."
+      ]
     },
     {
       "name": "2. Equipos",
       "item": [
-        {
-          "name": "Listar equipos",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/equipos",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "equipos"
-              ]
-            },
-            "description": "Autenticado."
-          },
-          "response": []
-        },
-        {
-          "name": "Obtener equipo por id",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/equipos/1",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "equipos",
-                "1"
-              ]
-            },
-            "description": "Autenticado."
-          },
-          "response": []
-        },
         {
           "name": "Crear equipo (ADMIN)",
           "request": {
@@ -256,6 +183,10 @@
               {
                 "key": "Content-Type",
                 "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenAdmin}}"
               }
             ],
             "url": {
@@ -268,118 +199,99 @@
                 "equipos"
               ]
             },
-            "description": "Solo ADMIN. 201 si OK.",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"nombre\": \"Estudiantes\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
+              "raw": "{\n  \"nombre\": \"River Plate\"\n}"
             }
-          },
-          "response": []
+          }
         },
         {
-          "name": "Modificar equipo (ADMIN)",
+          "name": "Crear equipo 2 (ADMIN)",
           "request": {
-            "method": "PUT",
+            "method": "POST",
             "header": [
               {
                 "key": "Content-Type",
                 "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenAdmin}}"
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/api/equipos/1",
+              "raw": "{{baseUrl}}/api/equipos",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "api",
-                "equipos",
-                "1"
+                "equipos"
               ]
             },
-            "description": "Solo ADMIN.",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"nombre\": \"Boca Juniors\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
+              "raw": "{\n  \"nombre\": \"Boca Juniors\"\n}"
             }
-          },
-          "response": []
+          }
         },
         {
-          "name": "Eliminar equipo (ADMIN)",
+          "name": "Listar equipos",
           "request": {
-            "method": "DELETE",
-            "header": [],
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenUser}}"
+              }
+            ],
             "url": {
-              "raw": "{{baseUrl}}/api/equipos/99",
+              "raw": "{{baseUrl}}/api/equipos",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "api",
-                "equipos",
-                "99"
+                "equipos"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Crear equipo con USER - debe dar 403",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenUser}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/equipos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "equipos"
               ]
             },
-            "description": "Solo ADMIN. Falla si el equipo está asociado a un partido."
-          },
-          "response": []
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Independiente\"\n}"
+            }
+          }
         }
-      ],
-      "description": "Lectura para cualquier autenticado; alta/baja solo ADMIN."
+      ]
     },
     {
       "name": "3. Fechas",
       "item": [
-        {
-          "name": "Listar fechas",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/fechas",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "fechas"
-              ]
-            },
-            "description": "Autenticado."
-          },
-          "response": []
-        },
-        {
-          "name": "Obtener fecha por id",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/fechas/1",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "fechas",
-                "1"
-              ]
-            },
-            "description": "Autenticado."
-          },
-          "response": []
-        },
         {
           "name": "Crear fecha (ADMIN)",
           "request": {
@@ -388,6 +300,10 @@
               {
                 "key": "Content-Type",
                 "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenAdmin}}"
               }
             ],
             "url": {
@@ -400,118 +316,39 @@
                 "fechas"
               ]
             },
-            "description": "Solo ADMIN.",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"nombre\": \"Fecha 3 - Octavos\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
+              "raw": "{\n  \"nombre\": \"Fecha 1\"\n}"
             }
-          },
-          "response": []
+          }
         },
         {
-          "name": "Modificar fecha (ADMIN)",
+          "name": "Listar fechas",
           "request": {
-            "method": "PUT",
+            "method": "GET",
             "header": [
               {
-                "key": "Content-Type",
-                "value": "application/json"
+                "key": "Authorization",
+                "value": "Bearer {{tokenUser}}"
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/api/fechas/1",
+              "raw": "{{baseUrl}}/api/fechas",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "api",
-                "fechas",
-                "1"
+                "fechas"
               ]
-            },
-            "description": "Solo ADMIN.",
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"nombre\": \"Fecha 1 - Fase de Grupos\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
             }
-          },
-          "response": []
-        },
-        {
-          "name": "Eliminar fecha (ADMIN)",
-          "request": {
-            "method": "DELETE",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/fechas/99",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "fechas",
-                "99"
-              ]
-            },
-            "description": "Solo ADMIN. Falla si no está PROGRAMADA o tiene partidos."
-          },
-          "response": []
+          }
         }
-      ],
-      "description": "El estado de la fecha lo calcula el backend automáticamente."
+      ]
     },
     {
       "name": "4. Partidos",
       "item": [
-        {
-          "name": "Listar partidos",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/partidos",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "partidos"
-              ]
-            },
-            "description": "Autenticado. Ordenados por hora de inicio."
-          },
-          "response": []
-        },
-        {
-          "name": "Obtener partido por id",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/partidos/1",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "partidos",
-                "1"
-              ]
-            },
-            "description": "Autenticado."
-          },
-          "response": []
-        },
         {
           "name": "Crear partido (ADMIN)",
           "request": {
@@ -520,6 +357,10 @@
               {
                 "key": "Content-Type",
                 "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenAdmin}}"
               }
             ],
             "url": {
@@ -532,58 +373,44 @@
                 "partidos"
               ]
             },
-            "description": "Solo ADMIN. horaInicio en UTC (ISO). Local != Visitante.",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"fechaId\": 2,\n  \"equipoLocalId\": 5,\n  \"equipoVisitanteId\": 6,\n  \"horaInicio\": \"2026-07-01T20:00:00Z\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
+              "raw": "{\n  \"fechaId\": 1,\n  \"equipoLocalId\": 1,\n  \"equipoVisitanteId\": 2,\n  \"horaInicio\": \"2026-12-20T20:00:00Z\"\n}"
             }
-          },
-          "response": []
+          }
         },
         {
-          "name": "Modificar partido (ADMIN)",
+          "name": "Listar partidos",
           "request": {
-            "method": "PUT",
+            "method": "GET",
             "header": [
               {
-                "key": "Content-Type",
-                "value": "application/json"
+                "key": "Authorization",
+                "value": "Bearer {{tokenUser}}"
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/api/partidos/1",
+              "raw": "{{baseUrl}}/api/partidos",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "api",
-                "partidos",
-                "1"
+                "partidos"
               ]
-            },
-            "description": "Solo ADMIN. Solo si está POR_JUGARSE.",
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"fechaId\": 2,\n  \"equipoLocalId\": 5,\n  \"equipoVisitanteId\": 6,\n  \"horaInicio\": \"2026-07-01T21:00:00Z\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
             }
-          },
-          "response": []
+          }
         },
         {
           "name": "Iniciar partido (ADMIN)",
           "request": {
             "method": "PATCH",
-            "header": [],
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenAdmin}}"
+              }
+            ],
             "url": {
               "raw": "{{baseUrl}}/api/partidos/1/start",
               "host": [
@@ -595,10 +422,8 @@
                 "1",
                 "start"
               ]
-            },
-            "description": "Solo ADMIN. Pasa de POR_JUGARSE a EN_JUEGO."
-          },
-          "response": []
+            }
+          }
         },
         {
           "name": "Cargar resultado (ADMIN)",
@@ -608,6 +433,10 @@
               {
                 "key": "Content-Type",
                 "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenAdmin}}"
               }
             ],
             "url": {
@@ -622,53 +451,29 @@
                 "resultado"
               ]
             },
-            "description": "Solo ADMIN. Solo si está EN_JUEGO. Dispara el motor de puntos y pasa a FINALIZADO.",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"golesLocal\": 2,\n  \"golesVisitante\": 1\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
+              "raw": "{\n  \"golesLocal\": 2,\n  \"golesVisitante\": 1\n}"
             }
-          },
-          "response": []
-        },
-        {
-          "name": "Eliminar partido (ADMIN)",
-          "request": {
-            "method": "DELETE",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/partidos/99",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "partidos",
-                "99"
-              ]
-            },
-            "description": "Solo ADMIN. Solo si está POR_JUGARSE y sin pronósticos."
-          },
-          "response": []
+          }
         }
-      ],
-      "description": "Lectura para autenticados; gestión solo ADMIN."
+      ]
     },
     {
       "name": "5. Pronósticos",
       "item": [
         {
-          "name": "Crear / modificar pronóstico (USER)",
+          "name": "Pronosticar partido (USER)",
           "request": {
             "method": "PUT",
             "header": [
               {
                 "key": "Content-Type",
                 "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenUser}}"
               }
             ],
             "url": {
@@ -682,24 +487,22 @@
                 "1"
               ]
             },
-            "description": "Solo USER. /{partidoId}. Upsert. Falla si no está POR_JUGARSE o si faltan <=30 min.",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"golesLocal\": 2,\n  \"golesVisitante\": 1\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
+              "raw": "{\n  \"golesLocal\": 2,\n  \"golesVisitante\": 1\n}"
             }
-          },
-          "response": []
+          }
         },
         {
           "name": "Mis pronósticos (USER)",
           "request": {
             "method": "GET",
-            "header": [],
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenUser}}"
+              }
+            ],
             "url": {
               "raw": "{{baseUrl}}/api/pronosticos/mios",
               "host": [
@@ -710,16 +513,19 @@
                 "pronosticos",
                 "mios"
               ]
-            },
-            "description": "Solo USER."
-          },
-          "response": []
+            }
+          }
         },
         {
-          "name": "Pronósticos de terceros (USER)",
+          "name": "Pronósticos de terceros por partido",
           "request": {
             "method": "GET",
-            "header": [],
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenUser}}"
+              }
+            ],
             "url": {
               "raw": "{{baseUrl}}/api/pronosticos/partido/1",
               "host": [
@@ -731,22 +537,24 @@
                 "partido",
                 "1"
               ]
-            },
-            "description": "Solo USER. /partido/{partidoId}. 403 si todavía no se cumplió el bloqueo de 30 min."
-          },
-          "response": []
+            }
+          }
         }
-      ],
-      "description": "El pronóstico son los goles estimados de local y visitante."
+      ]
     },
     {
       "name": "6. Leaderboard",
       "item": [
         {
-          "name": "Tabla global",
+          "name": "Leaderboard global",
           "request": {
             "method": "GET",
-            "header": [],
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenUser}}"
+              }
+            ],
             "url": {
               "raw": "{{baseUrl}}/api/leaderboard",
               "host": [
@@ -756,25 +564,26 @@
                 "api",
                 "leaderboard"
               ]
-            },
-            "description": "Autenticado. Ordenado por puntos, exactos y pronóstico más antiguo."
-          },
-          "response": []
+            }
+          }
         }
-      ],
-      "description": "Tabla de posiciones general."
+      ]
     },
     {
-      "name": "7. Grupos (RF8)",
+      "name": "7. Grupos",
       "item": [
         {
-          "name": "Crear grupo",
+          "name": "Crear grupo (USER)",
           "request": {
             "method": "POST",
             "header": [
               {
                 "key": "Content-Type",
                 "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenUser}}"
               }
             ],
             "url": {
@@ -787,27 +596,24 @@
                 "grupos"
               ]
             },
-            "description": "Autenticado. El backend genera el código de invitación único.",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"nombre\": \"Los del laburo\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
+              "raw": "{\n  \"nombre\": \"Grupo de amigos\"\n}"
             }
-          },
-          "response": []
+          }
         },
         {
-          "name": "Unirse a un grupo",
+          "name": "Unirse a grupo (USER)",
           "request": {
             "method": "POST",
             "header": [
               {
                 "key": "Content-Type",
                 "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenUser}}"
               }
             ],
             "url": {
@@ -821,24 +627,22 @@
                 "unirse"
               ]
             },
-            "description": "Autenticado. Código inexistente -> 404. Ya miembro -> 409.",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"codigoInvitacion\": \"PRODE01\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
+              "raw": "{\n  \"codigoInvitacion\": \"CODIGO123\"\n}"
             }
-          },
-          "response": []
+          }
         },
         {
-          "name": "Mis grupos",
+          "name": "Mis grupos (USER)",
           "request": {
             "method": "GET",
-            "header": [],
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenUser}}"
+              }
+            ],
             "url": {
               "raw": "{{baseUrl}}/api/grupos/mis-grupos",
               "host": [
@@ -849,16 +653,19 @@
                 "grupos",
                 "mis-grupos"
               ]
-            },
-            "description": "Autenticado."
-          },
-          "response": []
+            }
+          }
         },
         {
-          "name": "Ranking del grupo",
+          "name": "Ranking de grupo",
           "request": {
             "method": "GET",
-            "header": [],
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenUser}}"
+              }
+            ],
             "url": {
               "raw": "{{baseUrl}}/api/grupos/1/ranking",
               "host": [
@@ -870,563 +677,10 @@
                 "1",
                 "ranking"
               ]
-            },
-            "description": "Autenticado. /{id}/ranking. Mismo formato que el leaderboard global."
-          },
-          "response": []
+            }
+          }
         }
-      ],
-      "description": "Grupos privados con código de invitación."
-    },
-    {
-      "name": "8. Flujo de demo (en orden)",
-      "item": [
-        {
-          "name": "1) Login admin",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/api/auth/login",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "auth",
-                "login"
-              ]
-            },
-            "description": "Arranca como admin.",
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"email\": \"admin@prode.com\",\n  \"password\": \"admin123\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            },
-            "auth": {
-              "type": "noauth"
-            }
-          },
-          "response": [],
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "// Guarda el token del login en la variable {{token}} para usarlo solo",
-                  "const res = pm.response.json();",
-                  "if (res && res.datos && res.datos.token) {",
-                  "  pm.collectionVariables.set('token', res.datos.token);",
-                  "  pm.collectionVariables.set('rol', res.datos.rol);",
-                  "  console.log('Token guardado. Rol:', res.datos.rol);",
-                  "}"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "2) Crear equipo local",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/api/equipos",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "equipos"
-              ]
-            },
-            "description": "Guarda el id en {{equipoLocalId}}.",
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"nombre\": \"Local {{rnd}}\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            }
-          },
-          "response": [],
-          "event": [
-            {
-              "listen": "prerequest",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "// Sufijo único para no chocar con nombres ya existentes al re-ejecutar",
-                  "pm.collectionVariables.set('rnd', Date.now());"
-                ]
-              }
-            },
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "const r = pm.response.json();",
-                  "if (r && r.id) pm.collectionVariables.set('equipoLocalId', r.id);"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "3) Crear equipo visitante",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/api/equipos",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "equipos"
-              ]
-            },
-            "description": "Guarda el id en {{equipoVisitanteId}}.",
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"nombre\": \"Visitante {{rnd}}\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            }
-          },
-          "response": [],
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "const r = pm.response.json();",
-                  "if (r && r.id) pm.collectionVariables.set('equipoVisitanteId', r.id);"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "4) Crear fecha",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/api/fechas",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "fechas"
-              ]
-            },
-            "description": "Guarda el id en {{fechaId}}.",
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"nombre\": \"Fecha Demo {{rnd}}\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            }
-          },
-          "response": [],
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "const r = pm.response.json();",
-                  "if (r && r.id) pm.collectionVariables.set('fechaId', r.id);"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "5) Crear partido",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/api/partidos",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "partidos"
-              ]
-            },
-            "description": "Usa los ids guardados. Guarda el id en {{partidoId}}.",
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"fechaId\": \"{{fechaId}}\",\n  \"equipoLocalId\": \"{{equipoLocalId}}\",\n  \"equipoVisitanteId\": \"{{equipoVisitanteId}}\",\n  \"horaInicio\": \"{{horaInicio}}\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            }
-          },
-          "response": [],
-          "event": [
-            {
-              "listen": "prerequest",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "// Hora de inicio: dentro de 2 días, en UTC (así el partido es pronosticable)",
-                  "pm.collectionVariables.set('horaInicio', new Date(Date.now() + 2*24*60*60*1000).toISOString());"
-                ]
-              }
-            },
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "const r = pm.response.json();",
-                  "if (r && r.id) pm.collectionVariables.set('partidoId', r.id);"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "6) Login jugadora (lu)",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/api/auth/login",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "auth",
-                "login"
-              ]
-            },
-            "description": "Ahora el token es de USER.",
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"email\": \"lu@prode.com\",\n  \"password\": \"lu12345\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            },
-            "auth": {
-              "type": "noauth"
-            }
-          },
-          "response": [],
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "// Guarda el token del login en la variable {{token}} para usarlo solo",
-                  "const res = pm.response.json();",
-                  "if (res && res.datos && res.datos.token) {",
-                  "  pm.collectionVariables.set('token', res.datos.token);",
-                  "  pm.collectionVariables.set('rol', res.datos.rol);",
-                  "  console.log('Token guardado. Rol:', res.datos.rol);",
-                  "}"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "7) Cargar pronóstico",
-          "request": {
-            "method": "PUT",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/api/pronosticos/{{partidoId}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "pronosticos",
-                "{{partidoId}}"
-              ]
-            },
-            "description": "La jugadora pronostica el partido recién creado.",
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"golesLocal\": 2,\n  \"golesVisitante\": 1\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "8) Login admin",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/api/auth/login",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "auth",
-                "login"
-              ]
-            },
-            "description": "Volvemos a admin para gestionar el partido.",
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"email\": \"admin@prode.com\",\n  \"password\": \"admin123\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            },
-            "auth": {
-              "type": "noauth"
-            }
-          },
-          "response": [],
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "// Guarda el token del login en la variable {{token}} para usarlo solo",
-                  "const res = pm.response.json();",
-                  "if (res && res.datos && res.datos.token) {",
-                  "  pm.collectionVariables.set('token', res.datos.token);",
-                  "  pm.collectionVariables.set('rol', res.datos.rol);",
-                  "  console.log('Token guardado. Rol:', res.datos.rol);",
-                  "}"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "9) Iniciar partido",
-          "request": {
-            "method": "PATCH",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/partidos/{{partidoId}}/start",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "partidos",
-                "{{partidoId}}",
-                "start"
-              ]
-            },
-            "description": "Pasa a EN_JUEGO."
-          },
-          "response": []
-        },
-        {
-          "name": "10) Cargar resultado",
-          "request": {
-            "method": "PATCH",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/api/partidos/{{partidoId}}/resultado",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "partidos",
-                "{{partidoId}}",
-                "resultado"
-              ]
-            },
-            "description": "Pasa a FINALIZADO y calcula los puntos (acá 2-1 = exacto = 3 pts).",
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"golesLocal\": 2,\n  \"golesVisitante\": 1\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "11) Login jugadora (lu)",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/api/auth/login",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "auth",
-                "login"
-              ]
-            },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"email\": \"lu@prode.com\",\n  \"password\": \"lu12345\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            },
-            "auth": {
-              "type": "noauth"
-            }
-          },
-          "response": [],
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "// Guarda el token del login en la variable {{token}} para usarlo solo",
-                  "const res = pm.response.json();",
-                  "if (res && res.datos && res.datos.token) {",
-                  "  pm.collectionVariables.set('token', res.datos.token);",
-                  "  pm.collectionVariables.set('rol', res.datos.rol);",
-                  "  console.log('Token guardado. Rol:', res.datos.rol);",
-                  "}"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "12) Mis pronósticos",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/pronosticos/mios",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "pronosticos",
-                "mios"
-              ]
-            },
-            "description": "Verificamos que sumó los puntos."
-          },
-          "response": []
-        },
-        {
-          "name": "13) Leaderboard",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/leaderboard",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "leaderboard"
-              ]
-            },
-            "description": "La tabla refleja los puntos."
-          },
-          "response": []
-        }
-      ],
-      "description": "Ejecutá estas requests EN ORDEN (o usá el Runner). Cada paso guarda lo que necesita el siguiente."
+      ]
     }
   ]
 }
