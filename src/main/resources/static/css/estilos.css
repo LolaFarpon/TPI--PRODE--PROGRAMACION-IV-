@@ -1,0 +1,713 @@
+/* ══════════════════════════════════════════════════════════════════════
+   PRODE — Hoja de estilos
+   Concepto de diseño: "cancha de noche bajo reflectores".
+   - Fondo verde muy oscuro = el césped de noche.
+   - Líneas blancas finas (tiza) = las marcas de la cancha.
+   - Acento ámbar = la energía del gol / el silbato del árbitro.
+   - Números en monoespaciada = el marcador, como un tablero LED.
+   Firma visual: la "línea de mitad de cancha" (una raya con un círculo
+   central) que separa secciones.
+   ════════════════════════════════════════════════════════════════════════ */
+
+/* ─────────── 1. Tokens (variables de color, tipografía y medidas) ─────────── */
+:root {
+  /* Colores */
+  --cancha-0: #081A17;   /* fondo más profundo */
+  --cancha-1: #0A1F1C;   /* fondo principal */
+  --cancha-2: #112B27;   /* tarjetas / superficies */
+  --superficie: #112B27;
+  --superficie-alta: #16332E;
+  --tiza: #F2F5F0;       /* texto principal (blanco tiza) */
+  --tiza-suave: #9FB3AC; /* texto secundario */
+  --linea: rgba(242, 245, 240, 0.14); /* líneas de cancha / bordes */
+  --linea-fuerte: rgba(242, 245, 240, 0.28);
+
+  --ambar: #FF7A1A;      /* acento principal: acción, gol, energía */
+  --ambar-oscuro: #E5650A;
+  --verde-vivo: #34D27B; /* estados positivos / finalizado ok */
+  --celeste: #4DA3FF;    /* información */
+  --rojo: #FF5D5D;       /* errores / peligro */
+
+  /* Tipografías */
+  --display: 'Anton', 'Arial Narrow', sans-serif;
+  --texto: 'Inter', system-ui, -apple-system, sans-serif;
+  --mono: 'JetBrains Mono', 'Courier New', monospace;
+
+  /* Medidas */
+  --radio: 12px;
+  --radio-chico: 8px;
+  --ancho-max: 1080px;
+  --sombra: 0 10px 30px rgba(0, 0, 0, 0.35);
+}
+
+/* ─────────── 2. Reset suave y base ─────────── */
+*, *::before, *::after { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  font-family: var(--texto);
+  color: var(--tiza);
+  background-color: var(--cancha-1);
+  background-image:
+    linear-gradient(to bottom, rgba(8, 26, 23, 0.82) 0%, rgba(8, 26, 23, 0.95) 40%, var(--cancha-1) 100%),
+    url('../images/messi.jpeg');
+  background-size: cover;
+  background-position: center top;
+  background-attachment: fixed;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+a { color: inherit; text-decoration: none; }
+
+h1, h2, h3 { margin: 0; line-height: 1.05; }
+
+/* ─────────── 3. Barra superior ─────────── */
+.barra {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 14px clamp(16px, 4vw, 32px);
+  background: rgba(8, 26, 23, 0.85);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--linea);
+}
+
+.marca {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+.pelota { width: 30px; height: 30px; display: block; }
+.marca-texto {
+  font-family: var(--display);
+  font-size: 26px;
+  letter-spacing: 2px;
+  color: var(--tiza);
+}
+
+.nav {
+  display: flex;
+  gap: 4px;
+  margin-left: 8px;
+  flex: 1;
+  flex-wrap: wrap;
+}
+.nav a {
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--tiza-suave);
+  padding: 8px 14px;
+  border-radius: 999px;
+  transition: color .15s, background .15s;
+}
+.nav a:hover { color: var(--tiza); background: var(--superficie); }
+.nav a.activo {
+  color: var(--cancha-1);
+  background: var(--ambar);
+}
+
+.sesion { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+.chip-usuario {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px 6px 6px;
+  background: var(--superficie);
+  border: 1px solid var(--linea);
+  border-radius: 999px;
+  font-size: 13px;
+}
+.chip-usuario .avatar {
+  width: 26px; height: 26px;
+  display: grid; place-items: center;
+  background: var(--ambar);
+  color: var(--cancha-1);
+  border-radius: 50%;
+  font-family: var(--display);
+  font-size: 14px;
+}
+.chip-usuario .rol {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--tiza-suave);
+}
+
+/* ─────────── 4. Contenedor de contenido ─────────── */
+.contenedor {
+  flex: 1;
+  width: 100%;
+  max-width: var(--ancho-max);
+  margin: 0 auto;
+  padding: clamp(24px, 5vw, 48px) clamp(16px, 4vw, 32px);
+  animation: aparecer .4s ease both;
+}
+@keyframes aparecer {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* ─────────── 5. Encabezados de sección ─────────── */
+.eyebrow {
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--ambar);
+  margin-bottom: 10px;
+}
+.titulo {
+  font-family: var(--display);
+  font-size: clamp(36px, 7vw, 64px);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+.subtitulo {
+  color: var(--tiza-suave);
+  font-size: 16px;
+  max-width: 56ch;
+  margin-top: 12px;
+}
+
+/* ─────────── 6. Línea de mitad de cancha (firma visual) ─────────── */
+.linea-cancha {
+  position: relative;
+  height: 1px;
+  background: var(--linea);
+  margin: 28px 0;
+}
+.linea-cancha::after {
+  content: "";
+  position: absolute;
+  left: 50%; top: 50%;
+  width: 34px; height: 34px;
+  transform: translate(-50%, -50%);
+  border: 1px solid var(--linea);
+  border-radius: 50%;
+}
+
+/* ─────────── 7. Botones ─────────── */
+.boton {
+  font-family: var(--texto);
+  font-weight: 600;
+  font-size: 15px;
+  cursor: pointer;
+  border: none;
+  border-radius: var(--radio-chico);
+  padding: 12px 22px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: transform .08s, background .15s, border-color .15s;
+}
+.boton:active { transform: translateY(1px); }
+.boton-primario {
+  background: var(--ambar);
+  color: var(--cancha-1);
+}
+.boton-primario:hover { background: var(--ambar-oscuro); }
+.boton-fantasma {
+  background: transparent;
+  color: var(--tiza);
+  border: 1px solid var(--linea-fuerte);
+}
+.boton-fantasma:hover { border-color: var(--tiza); }
+.boton:disabled { opacity: .45; cursor: not-allowed; }
+
+/* ─────────── 8. Tarjetas ─────────── */
+.tarjeta {
+  background: var(--superficie);
+  border: 1px solid var(--linea);
+  border-radius: var(--radio);
+  padding: 22px;
+}
+
+/* ─────────── 9. Formularios ─────────── */
+.campo { margin-bottom: 16px; }
+.campo label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--tiza-suave);
+  margin-bottom: 6px;
+}
+.campo input, .campo select {
+  width: 100%;
+  font-family: var(--texto);
+  font-size: 15px;
+  color: var(--tiza);
+  background: var(--cancha-0);
+  border: 1px solid var(--linea-fuerte);
+  border-radius: var(--radio-chico);
+  padding: 12px 14px;
+  transition: border-color .15s;
+}
+.campo input:focus, .campo select:focus {
+  outline: none;
+  border-color: var(--ambar);
+}
+
+/* ─────────── 10. Marcador (componente firma, lo usamos en Etapa 3) ─────────── */
+.marcador {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 14px;
+}
+.marcador .equipo {
+  font-family: var(--display);
+  font-size: clamp(15px, 3vw, 22px);
+  text-transform: uppercase;
+  letter-spacing: .5px;
+}
+.marcador .equipo.local { text-align: right; }
+.marcador .equipo.visitante { text-align: left; }
+.marcador .resultado {
+  font-family: var(--mono);
+  font-weight: 700;
+  font-size: 26px;
+  background: var(--cancha-0);
+  border: 1px solid var(--linea-fuerte);
+  border-radius: var(--radio-chico);
+  padding: 6px 14px;
+  letter-spacing: 2px;
+  white-space: nowrap;
+}
+
+/* ─────────── 11. Chips de estado (POR_JUGARSE / EN_JUEGO / FINALIZADO) ─────────── */
+.estado {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--linea-fuerte);
+}
+.estado::before { content: ""; width: 7px; height: 7px; border-radius: 50%; }
+.estado.por_jugarse { color: var(--celeste); }
+.estado.por_jugarse::before { background: var(--celeste); }
+.estado.en_juego { color: var(--ambar); }
+.estado.en_juego::before { background: var(--ambar); animation: latido 1.2s infinite; }
+.estado.finalizado { color: var(--tiza-suave); }
+.estado.finalizado::before { background: var(--tiza-suave); }
+@keyframes latido {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: .4; transform: scale(1.4); }
+}
+
+/* ─────────── 12. Tabla (leaderboard, Etapa 4) ─────────── */
+.tabla { width: 100%; border-collapse: collapse; }
+.tabla th, .tabla td {
+  text-align: left;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--linea);
+}
+.tabla th {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--tiza-suave);
+  font-weight: 600;
+}
+.tabla td.num, .tabla th.num { text-align: right; font-family: var(--mono); }
+.tabla tr.yo { background: rgba(255, 122, 26, 0.08); }
+
+/* ─────────── 13. Estado vacío / placeholder ─────────── */
+.vacio {
+  text-align: center;
+  padding: 60px 20px;
+  border: 1px dashed var(--linea-fuerte);
+  border-radius: var(--radio);
+  color: var(--tiza-suave);
+}
+.vacio .icono { font-size: 40px; margin-bottom: 12px; }
+.vacio h3 { font-family: var(--display); font-size: 24px; color: var(--tiza); text-transform: uppercase; }
+
+/* ─────────── 14. Hero de inicio ─────────── */
+.hero { display: grid; gap: 18px; max-width: 720px; }
+.hero .acciones { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 8px; }
+.hero-tags { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 24px; }
+.hero-tag {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--tiza-suave);
+  border: 1px solid var(--linea);
+  border-radius: 999px;
+  padding: 6px 12px;
+}
+
+/* ─────────── 15. Avisos flotantes (toasts) ─────────── */
+.avisos {
+  position: fixed;
+  bottom: 22px; right: 22px;
+  display: flex; flex-direction: column; gap: 10px;
+  z-index: 100;
+}
+.aviso {
+  background: var(--superficie-alta);
+  border: 1px solid var(--linea-fuerte);
+  border-left: 4px solid var(--celeste);
+  border-radius: var(--radio-chico);
+  padding: 12px 16px;
+  font-size: 14px;
+  box-shadow: var(--sombra);
+  animation: entrar-aviso .25s ease both;
+  max-width: 320px;
+}
+.aviso.ok    { border-left-color: var(--verde-vivo); }
+.aviso.error { border-left-color: var(--rojo); }
+.aviso.info  { border-left-color: var(--celeste); }
+@keyframes entrar-aviso {
+  from { opacity: 0; transform: translateX(20px); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* ─────────── 16. Pie ─────────── */
+.pie {
+  padding: 24px;
+  text-align: center;
+  color: var(--tiza-suave);
+  font-size: 13px;
+}
+.pie .linea-cancha { max-width: var(--ancho-max); margin: 0 auto 16px; }
+
+/* ─────────── 17. Utilidades ─────────── */
+.cargando { color: var(--tiza-suave); font-family: var(--mono); font-size: 14px; }
+.grilla { display: grid; gap: 16px; }
+
+/* ─────────── 18. Responsive ─────────── */
+@media (max-width: 720px) {
+  .barra { flex-wrap: wrap; }
+  .nav { order: 3; width: 100%; justify-content: center; }
+  .marca-texto { font-size: 22px; }
+}
+
+/* ─────────── 19. Accesibilidad: respetar reduce-motion ─────────── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+
+/* Foco visible por teclado (accesibilidad) */
+:focus-visible { outline: 2px solid var(--ambar); outline-offset: 2px; }
+
+/* ─────────── 20. Pantalla de autenticación (Etapa 2) ─────────── */
+.auth {
+  min-height: 60vh;
+  display: grid;
+  place-items: center;
+}
+.auth-card {
+  width: 100%;
+  max-width: 420px;
+  padding: 0;
+  overflow: hidden;
+}
+.auth-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border-bottom: 1px solid var(--linea);
+}
+.auth-tab {
+  font-family: var(--texto);
+  font-weight: 600;
+  font-size: 15px;
+  cursor: pointer;
+  background: transparent;
+  color: var(--tiza-suave);
+  border: none;
+  padding: 16px;
+  position: relative;
+  transition: color .15s;
+}
+.auth-tab:hover { color: var(--tiza); }
+.auth-tab.activa { color: var(--tiza); }
+.auth-tab.activa::after {
+  content: "";
+  position: absolute;
+  left: 20%; right: 20%; bottom: -1px;
+  height: 2px;
+  background: var(--ambar);
+}
+.auth-cuerpo { padding: 26px 24px 28px; }
+.auth-cuerpo h2 {
+  font-family: var(--display);
+  font-size: 26px;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+.auth-cuerpo .ayuda {
+  color: var(--tiza-suave);
+  font-size: 14px;
+  margin: 0 0 20px;
+}
+.error-form {
+  color: var(--rojo);
+  font-size: 13px;
+  font-weight: 600;
+  margin: 0 0 14px;
+  min-height: 18px;
+}
+.auth .boton-primario { width: 100%; justify-content: center; margin-top: 4px; }
+.pista-campo { font-size: 12px; color: var(--tiza-suave); margin-top: 4px; }
+
+/* ─────────── 21. Partidos y pronósticos (Etapa 3) ─────────── */
+.jornada { margin-bottom: 30px; }
+.jornada-titulo {
+  font-family: var(--display);
+  font-size: 20px;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  margin-bottom: 14px;
+  display: flex; align-items: center; gap: 10px;
+}
+.jornada-titulo .estado { font-size: 10px; }
+
+.partido + .partido { margin-top: 14px; }
+.partido-top {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 14px;
+}
+.partido-hora {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--tiza-suave);
+  text-transform: capitalize;
+}
+.partido .marcador { margin-bottom: 16px; }
+.equipo.gano { color: var(--tiza); }
+.equipo.perdio { color: var(--tiza-suave); }
+
+.pron-zone { border-top: 1px solid var(--linea); padding-top: 14px; }
+.pron-label {
+  font-size: 12px; font-weight: 600;
+  color: var(--tiza-suave);
+  margin-bottom: 10px;
+}
+.pron-inputs { display: flex; align-items: center; gap: 8px; }
+.pron-inputs input {
+  width: 58px; text-align: center;
+  font-family: var(--mono); font-size: 18px;
+  padding: 8px; color: var(--tiza);
+  background: var(--cancha-0);
+  border: 1px solid var(--linea-fuerte);
+  border-radius: var(--radio-chico);
+}
+.pron-inputs input:focus { outline: none; border-color: var(--ambar); }
+.pron-inputs .sep { font-family: var(--mono); font-size: 18px; color: var(--tiza-suave); }
+.pron-inputs .boton { margin-left: auto; padding: 9px 16px; font-size: 14px; }
+/* sacamos las flechitas del input number para que se vea como un marcador */
+.pron-inputs input::-webkit-outer-spin-button,
+.pron-inputs input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.pron-inputs input[type=number] { -moz-appearance: textfield; }
+
+.pron-info { font-size: 14px; color: var(--tiza-suave); margin: 0; }
+.pron-puntos { font-family: var(--mono); font-weight: 700; }
+.pron-puntos.p3 { color: var(--verde-vivo); }
+.pron-puntos.p1 { color: var(--ambar); }
+.pron-puntos.p0 { color: var(--tiza-suave); }
+
+.btn-terceros {
+  background: none; border: none; padding: 0;
+  color: var(--celeste); font-size: 13px; font-weight: 600;
+  cursor: pointer; margin-top: 12px;
+}
+.btn-terceros:hover { text-decoration: underline; }
+.terceros { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.tercero {
+  font-family: var(--mono); font-size: 13px;
+  background: var(--cancha-0);
+  border: 1px solid var(--linea);
+  border-radius: 6px; padding: 3px 8px;
+}
+
+/* ─────────── 22. Resumen de stats + tabla scrollable ─────────── */
+.resumen { display: flex; gap: 28px; margin-bottom: 26px; flex-wrap: wrap; }
+.resumen .stat .n {
+  font-family: var(--display); font-size: 38px;
+  color: var(--ambar); line-height: 1;
+}
+.resumen .stat .l {
+  font-size: 12px; text-transform: uppercase;
+  letter-spacing: 1px; color: var(--tiza-suave); margin-top: 4px;
+}
+.tabla-scroll { overflow-x: auto; }
+
+/* ─────────── 23. Panel de gestión / ADMIN (Etapa 3b) ─────────── */
+.subnav {
+  display: flex; gap: 4px;
+  margin: 6px 0 26px;
+  border-bottom: 1px solid var(--linea);
+}
+.subnav-tab {
+  background: none; border: none; cursor: pointer;
+  font-family: var(--texto); font-weight: 600; font-size: 14px;
+  color: var(--tiza-suave); padding: 10px 16px; position: relative;
+  transition: color .15s;
+}
+.subnav-tab:hover { color: var(--tiza); }
+.subnav-tab.activa { color: var(--tiza); }
+.subnav-tab.activa::after {
+  content: ""; position: absolute; left: 16px; right: 16px; bottom: -1px;
+  height: 2px; background: var(--ambar);
+}
+
+.form-inline { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+.form-inline input {
+  flex: 1; min-width: 180px;
+  font-family: var(--texto); font-size: 15px; color: var(--tiza);
+  background: var(--cancha-0);
+  border: 1px solid var(--linea-fuerte);
+  border-radius: var(--radio-chico); padding: 12px 14px;
+}
+.form-inline input:focus { outline: none; border-color: var(--ambar); }
+
+.lista-admin { display: flex; flex-direction: column; gap: 8px; }
+.item-admin {
+  display: flex; justify-content: space-between; align-items: center; gap: 12px;
+  background: var(--superficie); border: 1px solid var(--linea);
+  border-radius: var(--radio-chico); padding: 12px 16px;
+}
+.item-admin > span { display: flex; align-items: center; gap: 10px; }
+.btn-eliminar {
+  background: none; border: none; color: var(--tiza-suave);
+  font-size: 16px; cursor: pointer; width: 28px; height: 28px;
+  border-radius: 50%; transition: .15s; flex-shrink: 0;
+}
+.btn-eliminar:hover { background: rgba(255, 93, 93, .15); color: var(--rojo); }
+
+.boton-peligro { background: transparent; color: var(--rojo); border: 1px solid var(--rojo); }
+.boton-peligro:hover { background: var(--rojo); color: var(--cancha-1); }
+
+.grilla-form {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 14px; margin-bottom: 16px;
+}
+.grilla-form .campo { margin-bottom: 0; }
+.acciones-fila { display: flex; gap: 10px; border-top: 1px solid var(--linea); padding-top: 14px; }
+.vacio-chico {
+  color: var(--tiza-suave); font-size: 14px; padding: 18px; text-align: center;
+  border: 1px dashed var(--linea-fuerte); border-radius: var(--radio-chico);
+}
+.admin-bloque-titulo {
+  font-family: var(--display); font-size: 18px; text-transform: uppercase;
+  letter-spacing: .5px; margin: 26px 0 14px;
+}
+
+/* ─────────── 24. Tabla de posiciones (Etapa 4) ─────────── */
+.tabla td.pos {
+  font-family: var(--mono);
+  font-weight: 700;
+  text-align: center;
+  width: 52px;
+  font-size: 16px;
+}
+.tabla th.pos { text-align: center; width: 52px; }
+.vos-tag {
+  font-family: var(--mono);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  background: var(--ambar);
+  color: var(--cancha-1);
+  border-radius: 4px;
+  padding: 1px 6px;
+  margin-left: 6px;
+  vertical-align: middle;
+}
+.nota { font-size: 13px; color: var(--tiza-suave); margin-top: 16px; }
+.tabla tr.yo td { font-weight: 600; }
+
+/* ─────────── 25. Grupos / RF8 (Etapa 5) ─────────── */
+.grupos-acciones {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 30px;
+}
+@media (max-width: 640px) {
+  .grupos-acciones { grid-template-columns: 1fr; }
+}
+.grupos-acciones h3 {
+  font-family: var(--display);
+  font-size: 18px;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+
+.grupo-head {
+  display: flex; justify-content: space-between; align-items: flex-start;
+  gap: 12px; margin-bottom: 14px;
+}
+.grupo-nombre {
+  font-family: var(--display);
+  font-size: 22px;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+}
+.grupo-dueno { font-size: 12px; color: var(--tiza-suave); margin-top: 2px; }
+
+.codigo-box {
+  display: flex; align-items: center; gap: 12px;
+  background: var(--cancha-0);
+  border: 1px dashed var(--linea-fuerte);
+  border-radius: var(--radio-chico);
+  padding: 10px 14px;
+}
+.codigo-box .label {
+  font-size: 11px; text-transform: uppercase; letter-spacing: 1px;
+  color: var(--tiza-suave);
+}
+.codigo-box .codigo {
+  font-family: var(--mono); font-weight: 700;
+  font-size: 18px; letter-spacing: 2px; color: var(--tiza);
+}
+.btn-copiar {
+  margin-left: auto;
+  background: none; border: 1px solid var(--linea-fuerte);
+  color: var(--tiza-suave); border-radius: 6px;
+  padding: 5px 10px; cursor: pointer; font-size: 12px;
+  transition: .15s;
+}
+.btn-copiar:hover { border-color: var(--ambar); color: var(--ambar); }
+.ranking-zona { margin-top: 14px; }
+.grupo-card + .grupo-card { margin-top: 14px; }
+
+/* ─────────── 26. Pulido final / responsive (Etapa 6) ─────────── */
+/* Que no se desborden en mobile */
+.pron-inputs { flex-wrap: wrap; }
+.acciones-fila { flex-wrap: wrap; }
+.grupo-head { flex-wrap: wrap; }
+
+/* Hover sutil en tarjetas interactivas (partidos y grupos) */
+.partido, .grupo-card { transition: border-color .15s; }
+.partido:hover, .grupo-card:hover { border-color: var(--linea-fuerte); }
+
+/* En mobile, la zona de pronóstico respira un poco más */
+@media (max-width: 480px) {
+  .contenedor { padding-left: 16px; padding-right: 16px; }
+  .pron-inputs .boton { margin-left: 0; width: 100%; margin-top: 6px; }
+  .marca-texto { font-size: 20px; }
+  .titulo { font-size: clamp(30px, 11vw, 44px); }
+  .resumen { gap: 18px; }
+}
+
+/* El select del admin con la flechita propia del sistema, pero alineado al tema */
+.campo select { appearance: none; -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%239FB3AC' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 14px center; padding-right: 36px;
+}
